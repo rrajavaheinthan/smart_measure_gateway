@@ -1,0 +1,211 @@
+openapi: 3.0.0
+info:
+  title: Smart Measure API
+  description: Smart Measure API for managing mesasurment data
+  version: 1.0.0
+servers:
+  - description: Local server
+    url: /sm-service-api
+  - description: Smart Measure
+    url: http://{baseHost}/sm-service-api
+    variables:
+      baseHost:
+        default: localhost:9877
+tags:
+  - name: measurements
+    description: Manage Measurements
+  - name: system
+    description: zzzendpoints used to manage and monitor the smart measure service
+
+paths:
+  /measurements:
+    post:
+      tags:
+        - measurements
+      operationId: createMeasurement
+      description: Create a new measurement.
+      requestBody:
+        description: A JSON representation of the measurement to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Measurement'
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Measurement'
+        400:
+          description: |
+            Bad request. Possible issues are:
+              * The accepted mimetype is not application/json or empty.
+              * A mandatory parameter is missing.
+              * The format of the json posted is incorrect.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        401:
+          description: Unauthorized. The API call is not correctly authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        403:
+          description: Forbidden. The user does not have the permissions to create a new measurement.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        409:
+          description: A measurement with the same name already exists.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        default:
+          description: Internal Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /measurementlist:
+    get:
+      tags:
+        - measurements
+      operationId: getMeasurementList
+      description: |
+        Return the list of the measurements.
+      responses:
+        200:
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeasurementSearchResult'
+        400:
+          description: |
+            Bad request. Possible issues are:
+              * The search term is missing.
+              * The page number is less than zero
+              * The page size is less than one.
+              * The sort key is not valid. Not all properties of a clause are considered to be valid keys for a sort.
+              * The sort direction is neither of the valid options.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    MeasurementSearchResult:
+      type: object
+      properties:
+        result_count:
+          type: long
+          description: |
+            Total number of measurements found by the search
+        measurements:
+          type: array
+          items:
+            $ref: '#/components/schemas/Measurement'
+
+    Measurement:
+      type: object
+      properties:
+        id:
+          type: string
+          description: |
+            System generated UUID that identifies the measurement.
+          format: uuid
+          readOnly: true
+        version_id:
+          type: string
+          description: |
+            System generated UUID that identifies the current version of the measurement.
+            A new value of this UUID is generated every time the measurement is saved.
+          format: uuid
+          writeOnly: true
+        key:
+          type: integer
+          description: |
+            The system key for the measurement. This isn't exposed to end users.
+            The key is unique and immutable. It is used to identify the measurement in API calls.
+          example: 451
+        source:
+          type: string
+          description: The source of the measurement. This is what the end user will see and be most common to them.
+          example: Test Pirates
+        name:
+          type: string
+          description: |
+            The user readable name for the measurement run as supplied by the user / source.
+          example: Rules 30.3 Run 1
+        type:
+          type: string
+          description: |
+            Measurement Type
+          example: Special Type
+        description:
+          type: string
+          description: |
+            The user description for the measurement run as supplied by the user / source.
+          example: First run using Rules 30.3
+        content:
+          type: string
+          description: The jason payload
+          example: 'some potentially long jason text holding measurement data'
+        owner:
+          type: string
+          description: A user (or user group) which owns the content
+          example: jbloggs
+        create_by:
+          type: string
+          description: The username of the user that created the measurement.
+          example: mary
+          readOnly: true
+        create_dt:
+          type: string
+          format: date-time
+          description: The date and time the measurement was created.
+          example: 2017-07-21T17:32:28Z
+          readOnly: true
+        update_by:
+          type: string
+          description: The username of the user that updated the measurement.
+          example: joe
+          readOnly: true
+        update_dt:
+          type: string
+          format: date-time
+          description: The last time the measurement was updated.
+          example: 2017-07-21T17:32:28Z
+          readOnly: true
+
+    ErrorResponse:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            required:
+              - context
+              - message
+            properties:
+              context:
+                type: string
+                description: the context where the error happened in the format <context-type>:<target>
+                example: field:id
+              message:
+                type: string
+                example: The resource could not be found or the user does not have the right to access it.
+              hint:
+                type: string
+                example: Check the ID of the resource provided.
+              other_properties:
+                type: object
+                additionalProperties: true

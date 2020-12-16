@@ -1,0 +1,28 @@
+{
+    "compilerOptions": {
+        "esModuleInterop": true,
+        "outDir": "./build",
+        "sourceMap": true,
+        "noImplicitAny": false,
+        "jsx": "react",
+        "declaration": false,
+        "noUnusedLocals": false,
+        "noUnusedParameters": false,
+        "resolveJsonModule": true,
+        "downlevelIteration": true
+    },
+    "include": [
+        "./src/**/*",
+        "./custom.d.ts"
+    ],
+    
+    "exclude": [
+        "./src/test/**/*"
+    ],
+    "paths": {
+        "*": [
+            "node_modules/*",
+            "./src/*"
+        ]
+    }
+}

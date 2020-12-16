@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  sm_ui:
+    build: ./smart-measure-ui
+    container_name: sm_ui
+    volumes: 
+      - "./smart-measure-ui/src/:/app/src"
+      - "/app/node_modules"
+    ports: 
+      - "4000:4000"
+    stdin_open: true
+    tty: true

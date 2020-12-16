@@ -1,0 +1,7 @@
+node_modules
+build
+coverage
+.vscode
+src/main/clause-library-api
+clause-library-ui/clause-library-api.yaml
+main
